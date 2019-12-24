@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "emscripten.h"
-#include "../libwebp/src/webp/decode.h"
+#include "./libwebp/src/webp/decode.h"
 
 
 EMSCRIPTEN_KEEPALIVE

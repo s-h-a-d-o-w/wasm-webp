@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.7)
+cmake_minimum_required (VERSION 3.1)
 project(webp_wasm)
 
 SET(CMAKE_BUILD_TYPE_INIT "Release")
@@ -9,21 +9,25 @@ endif ()
 
 file(GLOB SOURCE_FILES 
  *.c
- ../libwebp/src/dec/*.c
- ../libwebp/src/dsp/*.c
- ../libwebp/src/demux/*.c
- ../libwebp/src/enc/*.c
- ../libwebp/src/mux/*.c
- ../libwebp/src/utils/*.c
+ ./libwebp/src/dec/*.c
+ ./libwebp/src/dsp/*.c
+ ./libwebp/src/demux/*.c
+ ./libwebp/src/enc/*.c
+ ./libwebp/src/mux/*.c
+ ./libwebp/src/utils/*.c
 )
 
 add_executable(webp_wasm ${SOURCE_FILES})
 target_include_directories(webp_wasm PRIVATE
     $(EMSCRIPTEN)/system/include
-    ../libwebp
+    ./libwebp
 )
 set_target_properties(webp_wasm PROPERTIES LINK_FLAGS
     "-s WASM=1 \
+    -s ASSERTIONS=1 \
+    -O0 \
+    -s MODULARIZE=1 \
+    -s 'EXPORT_NAME=\"WebPDecoder\"' \
     -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\", \"getValue\"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -I libwebp")
