@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "emscripten.h"
-#include "./libwebp/src/webp/decode.h"
-
+#include "../libwebp/src/webp/decode.h"
+#include "../libwebp/src/webp/encode.h"
 
 EMSCRIPTEN_KEEPALIVE
 int version() {
@@ -30,4 +30,20 @@ uint8_t* decode(const uint8_t* data, size_t size) {
 
   uint8_t* buffer = WebPDecodeRGBA(data, size, &width, &height);
   return buffer;
+}
+
+struct EncodedImage {
+  size_t outputLength;
+  uint8_t* output;
+};
+
+EMSCRIPTEN_KEEPALIVE
+struct EncodedImage* encode(const uint8_t* data, int width, int height, int stride, float quality_factor) {
+  uint8_t* output;
+  size_t outputLength = WebPEncodeRGBA(data, width, height, stride, quality_factor, &output);
+
+  struct EncodedImage *imgData = malloc(sizeof(struct EncodedImage));
+  imgData->outputLength = outputLength;
+  imgData->output = output;
+  return imgData;
 }

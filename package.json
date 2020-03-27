@@ -1,12 +1,31 @@
 {
-  "name": "wasm-webp",
+  "name": "webpjs",
   "version": "0.0.1",
+  "main": "./dist",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "build": "gulp compile && cmake -DCMAKE_BUILD_TYPE=Release && make"
+    "build": "yarn build:wasm && rm -rf dist && npx tsc && cp ./build_wasm/webp_wasm.wasm ./dist/build_wasm/webp_wasm.wasm",
+    "build:wasm": "./build.sh",
+    "dev": "tsnd --respawn --no-notify ./src/example.ts"
   },
   "dependencies": {
-    "cross-env": "6.0.3",
     "gulp": "4.0.2",
     "gulp-replace": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/emscripten": "1.39.3",
+    "@types/node": "13.1.2",
+    "@typescript-eslint/eslint-plugin": "2.10.0",
+    "@typescript-eslint/parser": "2.10.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "eslint-plugin-prettier": "3.1.2",
+    "jimp": "0.9.6",
+    "prettier": "1.19.1",
+    "serve": "11.3.0",
+    "ts-node-dev": "1.0.0-pre.44",
+    "typescript": "3.8.3"
   }
 }

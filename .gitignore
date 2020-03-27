@@ -1,16 +1,10 @@
 node_modules
 
-# Generated build files
-classic
-CMakeFiles
-cmake_install.cmake
-CMakeCache.txt
-CopyOfCMakeCache.txt
-Makefile
-
-# Compiled files
-webp_wasm.js
-webp_wasm.wasm
+/build_wasm
+/dist
 
 # Other
+.vscode
 *.log
+*.tgz
+/assets/output.*
