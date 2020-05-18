@@ -8,7 +8,9 @@
   "scripts": {
     "build": "yarn build:wasm && rm -rf dist && npx tsc && cp ./build/webp_wasm.wasm ./dist/build/webp_wasm.wasm",
     "build:wasm": "./build.sh",
-    "dev": "tsnd --respawn --no-notify ./example"
+    "dev": "tsnd --respawn --no-notify ./example",
+    "test": "tsnd --no-notify ./src/index.test.ts",
+    "test:watch": "tsnd --respawn --no-notify ./src/index.test.ts"
   },
   "dependencies": {
     "gulp": "4.0.2",
