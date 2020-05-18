@@ -28,6 +28,8 @@
     "isolatedModules": true
   },
   "exclude": [
-    "./src/example.ts"
+    "./dist",
+    "./example",
+    "./libwebp",
   ]
 }

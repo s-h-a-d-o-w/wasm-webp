@@ -1,14 +1,14 @@
 {
-  "name": "webpjs",
+  "name": "simple-wasm-webp",
   "version": "0.0.1",
   "main": "./dist",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "build": "yarn build:wasm && rm -rf dist && npx tsc && cp ./build_wasm/webp_wasm.wasm ./dist/build_wasm/webp_wasm.wasm",
+    "build": "yarn build:wasm && rm -rf dist && npx tsc && cp ./build/webp_wasm.wasm ./dist/build/webp_wasm.wasm",
     "build:wasm": "./build.sh",
-    "dev": "tsnd --respawn --no-notify ./src/example.ts"
+    "dev": "tsnd --respawn --no-notify ./example"
   },
   "dependencies": {
     "gulp": "4.0.2",

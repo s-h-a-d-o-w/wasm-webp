@@ -10,7 +10,7 @@ const wasm: any = {};
 
 export function init() {
   return new Promise((resolve) => {
-    require(path.join(__dirname, '../build_wasm/webp_wasm'))().then(
+    require(path.join(__dirname, '../build/webp_wasm'))().then(
       (module: WebpJSEmscriptenModule) => {
         Module = module;
 
