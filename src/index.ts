@@ -10,14 +10,19 @@ const wasm: any = {};
 
 export function init() {
   return new Promise((resolve) => {
-    require(path.join(__dirname, '../build/webp_wasm'))().then(
+    require(path.join(__dirname, '../build/wasm_webp'))().then(
       (module: WebpJSEmscriptenModule) => {
         Module = module;
 
         wasm.version = Module.cwrap('version', 'number', []);
         wasm.getInfo = Module.cwrap('getInfo', 'number', ['number', 'number']);
-        wasm.decode = Module.cwrap('decode', 'number', ['number', 'number']);
+        wasm.decode = Module.cwrap('decode', 'number', [
+          'number',
+          'number',
+          'number',
+        ]);
         wasm.encode = Module.cwrap('encode', 'number', [
+          'number',
           'number',
           'number',
           'number',
@@ -32,22 +37,22 @@ export function init() {
 }
 
 export function decodeSync(buffer: Buffer) {
-  const {width, height} = getInfo(buffer);
+  const {width, height, hasAlpha} = getInfo(buffer);
 
   const ptr = Module._malloc(buffer.byteLength);
   Module.HEAPU8.set(new Uint8Array(buffer), ptr);
 
-  const resultPtr = wasm.decode(ptr, buffer.byteLength);
+  const resultPtr = wasm.decode(ptr, buffer.byteLength, hasAlpha);
   const resultView = new Uint8Array(
     Module.HEAPU8.buffer,
     resultPtr,
-    width * height * 4
+    width * height * (hasAlpha ? 4 : 3)
   );
 
   Module._free(ptr);
   Module._free(resultPtr);
 
-  return new Uint8ClampedArray(resultView);
+  return resultView;
 }
 
 export function decode(buffer: Buffer): Promise<ReturnType<typeof decodeSync>> {
@@ -56,16 +61,28 @@ export function decode(buffer: Buffer): Promise<ReturnType<typeof decodeSync>> {
   });
 }
 
+type EncodeOptions = {
+  height: number;
+  width: number;
+  hasAlpha?: boolean;
+  quality?: number;
+};
+
 export function encodeSync(
   buffer: Buffer,
-  width: number,
-  height: number,
-  quality: number
+  {height, width, hasAlpha = true, quality = 80}: EncodeOptions
 ) {
   const ptr = Module._malloc(buffer.byteLength);
   Module.HEAPU8.set(new Uint8Array(buffer), ptr);
 
-  const resultPtr = wasm.encode(ptr, width, height, width * 4, quality);
+  const resultPtr = wasm.encode(
+    ptr,
+    width,
+    height,
+    width * (hasAlpha ? 4 : 3),
+    quality,
+    hasAlpha
+  );
 
   const outputLength = Module.getValue(resultPtr, 'i32');
   const outputPtr = Module.getValue(resultPtr + 4, 'i32');
@@ -77,19 +94,22 @@ export function encodeSync(
   );
 
   Module._free(ptr);
+  // TODO: This is necessary to get correct results. But why?
+  // It frees the memory that we return a Uint8Array view on. So if anything,
+  // calling it should result in INCORRECT results, not the other way around?
+  // Is it maybe due to some emcc magic where it keeps track of freeing memory
+  // and then copies data to where it's accessible by JS?
   Module._free(resultPtr);
 
-  return new Uint8ClampedArray(resultView);
+  return resultView;
 }
 
 export function encode(
   buffer: Buffer,
-  width: number,
-  height: number,
-  quality: number
+  options: EncodeOptions
 ): Promise<ReturnType<typeof encodeSync>> {
   return new Promise((resolve) => {
-    resolve(encodeSync(buffer, width, height, quality));
+    resolve(encodeSync(buffer, options));
   });
 }
 
@@ -99,17 +119,16 @@ export function getInfo(buffer: Buffer) {
 
   const resultPtr = wasm.getInfo(ptr, buffer.byteLength);
 
-  const success = !!Module.getValue(resultPtr, 'i32');
-  if (!success) {
+  if (resultPtr !== 0) {
+    const width = Module.getValue(resultPtr, 'i32') as number;
+    const height = Module.getValue(resultPtr + 4, 'i32') as number;
+    const hasAlpha = Module.getValue(resultPtr + 8, 'i32') as number;
+
+    Module._free(ptr);
     Module._free(resultPtr);
-    throw new Error('Could not get info of buffer.');
+
+    return {width, height, hasAlpha: hasAlpha === 1};
   }
 
-  const width = Module.getValue(resultPtr + 4, 'i32') as number;
-  const height = Module.getValue(resultPtr + 8, 'i32') as number;
-
-  Module._free(ptr);
-  Module._free(resultPtr);
-
-  return {width, height};
+  throw new Error('Could not retrieve info.');
 }
