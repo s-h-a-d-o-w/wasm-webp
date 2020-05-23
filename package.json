@@ -6,6 +6,7 @@
     "dist/**/*"
   ],
   "scripts": {
+    "benchmark": "ts-node ./examples/benchmark.ts",
     "build": "yarn build:wasm && rm -rf dist && npx tsc && cp ./build/wasm_webp.wasm ./dist/build/wasm_webp.wasm",
     "build:wasm": "docker run --rm -v $(pwd):/src trzeci/emscripten:1.39.10-fastcomp ./build.sh",
     "dev": "tsnd --respawn --no-notify ./examples",
