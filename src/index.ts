@@ -99,6 +99,7 @@ export function encodeSync(
   );
 
   Module._free(ptr);
+  Module._free(outputPtr);
   // TODO: This is necessary to get correct results. But why?
   // It frees the memory that we return a Uint8Array view on. So if anything,
   // calling it should result in INCORRECT results, not the other way around?
@@ -125,14 +126,23 @@ export function getInfo(buffer: Buffer) {
   const resultPtr = wasm.getInfo(ptr, buffer.byteLength);
 
   if (resultPtr !== 0) {
+    // See WebPBitstreamFeatures here: https://github.com/webmproject/libwebp/blob/master/src/webp/decode.h
     const width = Module.getValue(resultPtr, 'i32') as number;
     const height = Module.getValue(resultPtr + 4, 'i32') as number;
     const hasAlpha = Module.getValue(resultPtr + 8, 'i32') as number;
+    const hasAnimation = Module.getValue(resultPtr + 12, 'i32') as number;
+    const format = Module.getValue(resultPtr + 16, 'i32') as number;
 
     Module._free(ptr);
     Module._free(resultPtr);
 
-    return {width, height, hasAlpha: hasAlpha === 1};
+    return {
+      width,
+      height,
+      format,
+      hasAlpha: hasAlpha === 1,
+      hasAnimation,
+    };
   }
 
   throw new Error('Could not retrieve info.');

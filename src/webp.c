@@ -13,30 +13,13 @@ int version() {
   return WebPGetDecoderVersion();
 }
 
-// EMSCRIPTEN_KEEPALIVE
-// int* getInfo(const uint8_t* data, size_t size) {
-//   int* results = (int*) malloc(3 * sizeof(int));
-
-//   int width;
-//   int height;
-
-//   // (const uint8_t* data, size_t size, int* w, int* h) -> int;
-//   results[0] = WebPGetInfo(data, size, &width, &height);
-//   results[1] = width;
-//   results[2] = height;
-
-//   return results;
-// }
-
 EMSCRIPTEN_KEEPALIVE
 WebPBitstreamFeatures* getInfo(const uint8_t* data, size_t size) {
-  int* results = (int*) malloc(3 * sizeof(int));
-
   WebPBitstreamFeatures* features = malloc(sizeof(struct WebPBitstreamFeatures));
 
   if(WebPGetFeatures(data, size, features) == VP8_STATUS_OK) {
-                                return features;
-                              }
+    return features;
+  }
 
   return 0;
 }
@@ -50,11 +33,6 @@ uint8_t* decode(const uint8_t* data, size_t size, int hasAlpha) {
   return buffer;
 }
 
-// EMSCRIPTEN_KEEPALIVE
-// uint8_t* decode(const uint8_t* data, size_t size) {
-//   return decode(data, size, 1);
-// }
-
 EMSCRIPTEN_KEEPALIVE
 struct EncodedImage* encode(const uint8_t* data, int width, int height, int stride, float qualityFactor, int hasAlpha) {
   uint8_t* output;
@@ -67,8 +45,3 @@ struct EncodedImage* encode(const uint8_t* data, int width, int height, int stri
   imgData->output = output;
   return imgData;
 }
-
-// EMSCRIPTEN_KEEPALIVE
-// struct EncodedImage* encode(const uint8_t* data, int width, int height, int stride, float quality_factor) {
-//   return encode(data, width, height, stride, quality_factor, 1);
-// }

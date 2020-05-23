@@ -5,38 +5,48 @@ init().then(async () => {
   console.log('Benchmarks: Encoding and then decoding again');
   console.log('=============================================');
 
-  let data = new Array(256 * 256 * 4).fill(0);
+  let resolution = 512;
 
-  console.log('100 256x256 images...');
+  console.log('Encoding 50 512x512 images...');
+  const data = Buffer.alloc(resolution * resolution * 4);
 
   let start = Date.now();
-  for (let i = 0; i < 100; i++) {
-    const temp = await encode(Buffer.from(data), {
-      width: 256,
-      height: 256,
+  for (let i = 0; i < 50; i++) {
+    await encode(Buffer.from(data), {
+      width: resolution,
+      height: resolution,
     });
-    await decode(Buffer.from(temp));
   }
 
-  console.log(`Finished in: ${Date.now() - start} ms\n`);
+  let duration = Date.now() - start;
+  console.log(`Finished in: ${duration} ms (${duration / 50} ms per image)\n`);
 
-  // TODO: Having an alpha channel results in heap running out of memory.
-  // Can this be prevented?
-  data = new Array(4096 * 4096 * 3).fill(0);
-
-  console.log('====================================');
-  console.log('A 4096x4096 image...');
+  console.log('Decoding 50 512x512 images...');
+  const encoded = Buffer.from(
+    await encode(Buffer.from(data), {
+      width: resolution,
+      height: resolution,
+    })
+  );
 
   start = Date.now();
-  for (let i = 0; i < 1; i++) {
-    const temp = await encode(Buffer.from(data), {
-      width: 4096,
-      height: 4096,
-      hasAlpha: false,
-    });
-    await decode(Buffer.from(temp));
+  for (let i = 0; i < 50; i++) {
+    await decode(encoded);
   }
+  duration = Date.now() - start;
+  console.log(`Finished in: ${duration} ms (${duration / 50} ms per image)\n`);
 
-  console.log(`Finished in: ${Date.now() - start} ms`);
-  console.log('====================================');
+  console.log('Encoding a single 4K image...');
+  resolution = 4096;
+  start = Date.now();
+  const encoded4K = await encode(Buffer.alloc(resolution * resolution * 4), {
+    width: resolution,
+    height: resolution,
+  });
+  console.log(`Finished in: ${Date.now() - start} ms\n`);
+
+  console.log('Decoding a single 4K image...');
+  start = Date.now();
+  await decode(Buffer.from(encoded4K));
+  console.log(`Finished in: ${Date.now() - start} ms\n`);
 });
