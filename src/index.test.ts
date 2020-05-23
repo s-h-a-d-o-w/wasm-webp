@@ -14,7 +14,7 @@ init().then(async () => {
     width: 1,
     height: 1,
   });
-  const decoded = await decode(Buffer.from(encoded));
+  const {data: decoded} = await decode(Buffer.from(encoded));
   // Since compression is lossy, output can vary. While it should stay the same with same settings
   // (unless libwebp changes), I don't want to rely on a magic number just so I can do a strict
   // comparison.
@@ -70,7 +70,7 @@ init().then(async () => {
     height: 1,
     hasAlpha: false,
   });
-  const decodedNoAlpha = await decode(Buffer.from(encodedNoAlpha));
+  const {data: decodedNoAlpha} = await decode(Buffer.from(encodedNoAlpha));
   passed =
     decodedNoAlpha.length === 3 &&
     decodedNoAlpha.every(function(value, index) {

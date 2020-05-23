@@ -52,7 +52,12 @@ export function decodeSync(buffer: Buffer) {
   Module._free(ptr);
   Module._free(resultPtr);
 
-  return resultView;
+  return {
+    data: resultView,
+    hasAlpha,
+    height,
+    width,
+  };
 }
 
 export function decode(buffer: Buffer): Promise<ReturnType<typeof decodeSync>> {

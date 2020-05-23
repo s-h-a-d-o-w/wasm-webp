@@ -20,18 +20,17 @@ init().then(async () => {
   const image = await Jimp.read(originalPath);
   fs.writeFileSync(
     webpOutputPath,
-    await encode(
-      Buffer.from(image.bitmap.data),
-      image.bitmap.width,
-      image.bitmap.height,
-      80
-    )
+    await encode(Buffer.from(image.bitmap.data), {
+      width: image.bitmap.width,
+      height: image.bitmap.height,
+      hasAlpha: image.hasAlpha(),
+    })
   );
   console.log('Encoding done, see assets/output.webp.');
 
   // Decoding
   const webp = fs.readFileSync(webpOutputPath);
-  const webpDecoded = await decode(webp);
+  const {data: webpDecoded} = await decode(webp);
   const webpInfo = await getInfo(webp);
   const rawImage = await Jimp.create(webpInfo.width, webpInfo.height);
 
