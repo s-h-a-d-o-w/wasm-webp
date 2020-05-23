@@ -29,7 +29,8 @@
   },
   "exclude": [
     "./dist",
-    "./example",
+    "examples",
     "./libwebp",
+    "**/*.test.ts"
   ]
 }
