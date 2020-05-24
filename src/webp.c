@@ -16,21 +16,14 @@ int version() {
 EMSCRIPTEN_KEEPALIVE
 WebPBitstreamFeatures* getInfo(const uint8_t* data, size_t size) {
   WebPBitstreamFeatures* features = malloc(sizeof(struct WebPBitstreamFeatures));
-
-  if(WebPGetFeatures(data, size, features) == VP8_STATUS_OK) {
-    return features;
-  }
-
-  return 0;
+  return WebPGetFeatures(data, size, features) == VP8_STATUS_OK ? features : 0;
 }
 
 EMSCRIPTEN_KEEPALIVE
 uint8_t* decode(const uint8_t* data, size_t size, int hasAlpha) {
   int width;
   int height;
-
-  uint8_t* buffer = hasAlpha ? WebPDecodeRGBA(data, size, &width, &height) : WebPDecodeRGB(data, size, &width, &height);
-  return buffer;
+  return hasAlpha ? WebPDecodeRGBA(data, size, &width, &height) : WebPDecodeRGB(data, size, &width, &height);
 }
 
 EMSCRIPTEN_KEEPALIVE
